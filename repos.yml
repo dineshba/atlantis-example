@@ -1,0 +1,15 @@
+workflows:
+  myworkflow:
+    plan:
+      steps:
+      - init
+      - plan
+      - run: tf-summarize -md $PLANFILE -out=/tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM-$WORKSPACE-$REPO_REL_DIR-tf-summarize.md
+
+repos:
+  - id: /.*/
+    workflow: tf-summarize
+    post_workflow_hooks:
+      - description: "Upload summary as comment to PR"
+        run: |
+          cat /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM-*-tf-summarize.md | github-commenter -format "Output from `terraform plan summary:`<br/>```{{.}}```"
